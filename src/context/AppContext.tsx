@@ -28,15 +28,26 @@ export type AttendanceRecord = {
 export type TaskStatus = 'Pending' | 'In Progress' | 'Completed';
 export type TaskPriority = 'Low' | 'Medium' | 'High';
 
+export type TaskAttachment = {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  data: string; // Base64 encoded file data
+  uploadedAt: string;
+};
+
 export type Task = {
   id: string;
   title: string;
   description: string;
   assignedTo: string;
+  assinedBy: string;
   deadline: string;
   priority: TaskPriority;
   status: TaskStatus;
   createdAt: string;
+  attachments?: TaskAttachment[];
 };
 
 export type LeaveType = 'Casual' | 'Sick' | 'Annual' | 'Emergency';
@@ -95,6 +106,8 @@ interface AppContextType {
   addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
+  addTaskAttachment: (taskId: string, attachment: Omit<TaskAttachment, 'id' | 'uploadedAt'>) => void;
+  deleteTaskAttachment: (taskId: string, attachmentId: string) => void;
 
   addLeaveRequest: (request: Omit<LeaveRequest, 'id' | 'requestedAt' | 'status'>) => void;
   updateLeaveRequestStatus: (id: string, status: LeaveStatus) => void;
@@ -185,9 +198,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
       setTasks([
-        { id: "TSK-001", title: "Complete Q3 Report", description: "Compile all financial data for Q3 and prepare executive summary with charts and projections for the board meeting.", assignedTo: "EMP004", deadline: nextWeek.toISOString().split('T')[0], priority: "High", status: "Pending", createdAt: today.toISOString() },
-        { id: "TSK-002", title: "Update Homepage", description: "Implement the new design system on the landing page. Ensure mobile responsiveness and cross-browser compatibility.", assignedTo: "EMP001", deadline: yesterday.toISOString().split('T')[0], priority: "High", status: "In Progress", createdAt: yesterday.toISOString() },
-        { id: "TSK-003", title: "Review Candidates", description: "Review resumes for the senior developer position. Shortlist top 5 candidates and schedule technical interviews.", assignedTo: "EMP002", deadline: today.toISOString().split('T')[0], priority: "Medium", status: "Pending", createdAt: yesterday.toISOString() },
+        { id: "TSK-001", title: "Complete Q3 Report", description: "Compile all financial data for Q3 and prepare executive summary with charts and projections for the board meeting.", assignedTo: "EMP004", deadline: nextWeek.toISOString().split('T')[0], priority: "High", status: "Pending", createdAt: today.toISOString(), attachments: [] },
+        { id: "TSK-002", title: "Update Homepage", description: "Implement the new design system on the landing page. Ensure mobile responsiveness and cross-browser compatibility.", assignedTo: "EMP001", deadline: yesterday.toISOString().split('T')[0], priority: "High", status: "In Progress", createdAt: yesterday.toISOString(), attachments: [] },
+        { id: "TSK-003", title: "Review Candidates", description: "Review resumes for the senior developer position. Shortlist top 5 candidates and schedule technical interviews.", assignedTo: "EMP002", deadline: today.toISOString().split('T')[0], priority: "Medium", status: "Pending", createdAt: yesterday.toISOString(), attachments: [] },
       ]);
     }
   }, []);
@@ -219,13 +232,42 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addTask = (task: Omit<Task, 'id' | 'createdAt'>) => {
-    setTasks(prev => [...prev, { ...task, id: `TSK-${Date.now()}`, createdAt: new Date().toISOString() }]);
+    setTasks(prev => [...prev, { ...task, id: `TSK-${Date.now()}`, createdAt: new Date().toISOString(), attachments: task.attachments || [] }]);
   };
   const updateTask = (id: string, task: Partial<Task>) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, ...task } : t));
   };
   const deleteTask = (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
+  };
+
+  const addTaskAttachment = (taskId: string, attachment: Omit<TaskAttachment, 'id' | 'uploadedAt'>) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        const newAttachment: TaskAttachment = {
+          ...attachment,
+          id: `ATT-${Date.now()}`,
+          uploadedAt: new Date().toISOString()
+        };
+        return {
+          ...t,
+          attachments: [...(t.attachments || []), newAttachment]
+        };
+      }
+      return t;
+    }));
+  };
+
+  const deleteTaskAttachment = (taskId: string, attachmentId: string) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        return {
+          ...t,
+          attachments: (t.attachments || []).filter(a => a.id !== attachmentId)
+        };
+      }
+      return t;
+    }));
   };
 
   const addLeaveRequest = (request: Omit<LeaveRequest, 'id' | 'requestedAt' | 'status'>) => {
@@ -260,7 +302,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       employees, attendanceRecords, tasks, leaveRequests, automationSettings, appSettings, notifications,
       addEmployee, updateEmployee, deleteEmployee,
       addAttendanceRecord, updateAttendanceRecord,
-      addTask, updateTask, deleteTask,
+      addTask, updateTask, deleteTask, addTaskAttachment, deleteTaskAttachment,
       addLeaveRequest, updateLeaveRequestStatus,
       updateAutomationSettings, updateAppSettings,
       addNotification, markAllNotificationsRead, clearNotifications,
