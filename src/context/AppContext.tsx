@@ -121,7 +121,7 @@ interface AppContextType {
 }
 
 const defaultEmployees: Employee[] = [
-  { id: "EMP001", name: "Arjun Sharma", email: "admin@agniit.com", password: "Admin@123", department: "Development", position: "Senior Developer", phone: "+91-9876543210", joiningDate: "2022-01-15" },
+  { id: "EMP001", name: "Arjun Sharma", email: "su-24032@sitare.org", password: "Admin@123", department: "Development", position: "Senior Developer", phone: "+91-9876543210", joiningDate: "2022-01-15" },
   { id: "EMP002", name: "Priya Patel", email: "priya@agniit.com", password: "Priya@123", department: "HR", position: "HR Manager", phone: "+91-9876543211", joiningDate: "2021-06-01" },
   { id: "EMP003", name: "Rahul Verma", email: "rahul@agniit.com", password: "Rahul@123", department: "Marketing", position: "Marketing Lead", phone: "+91-9876543212", joiningDate: "2023-03-10" },
   { id: "EMP004", name: "Sneha Gupta", email: "sneha@agniit.com", password: "Sneha@123", department: "Finance", position: "Finance Analyst", phone: "+91-9876543213", joiningDate: "2022-09-20" },
