@@ -29,7 +29,7 @@ A modern Employee Management and CRM Dashboard built with Next.js and TypeScript
 
 ## Live Demo
 
-agni-it-employee-crm-dash-board-t6t6-j2k0lq16h-agni-it.vercel.app
+[agni-it-employee-crm-dash-board-t6t6-j2k0lq16h-agni-it.vercel.app](https://agni-it-employee-crm-dash-board-t6t6-j2k0lq16h-agni-it.vercel.app/dashboard)
 
 
 ## Installation
