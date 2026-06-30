@@ -296,7 +296,7 @@ export default function LoginPage() {
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Email:</span>
-                    <span className="font-mono text-foreground">admin@agniit.com</span>
+                    <span className="font-mono text-foreground">su-24032@sitare.org</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Password:</span>
