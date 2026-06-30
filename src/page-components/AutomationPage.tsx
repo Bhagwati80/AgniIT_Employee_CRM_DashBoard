@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { useAuthContext } from "@/context/AuthContext";
-import { Zap, Bell, Clock, ClipboardList, Calendar, Mail } from "lucide-react";
+import { Zap, Bell, Clock, ClipboardList, Calendar, Mail, MessageCircle } from "lucide-react";
 
 const AUTOMATIONS = [
   {
@@ -122,37 +122,104 @@ export default function AutomationPage() {
     return () => clearInterval(id);
   }, [automationSettings, attendanceRecords, leaveRequests, tasks, currentUser]);
 
-  const sendTaskSummaryEmail = () => {
-    if (!currentUser) return;
-    const today = new Date().toISOString().split("T")[0];
-    const myTasks = tasks.filter(t => t.assignedTo === currentUser.id);
-    const pending = myTasks.filter(t => t.status === "Pending");
-    const inProgress = myTasks.filter(t => t.status === "In Progress");
-    const overdue = myTasks.filter(t => t.status !== "Completed" && t.deadline < today);
+  const sendTaskSummaryEmail = async () => {
+      if (!currentUser) return;
 
-    const subject = encodeURIComponent(`AgniIT HRMS — Daily Task Summary for ${today}`);
+      const today = new Date().toISOString().split("T")[0];
 
-    const lines = [
-      `Hi ${currentUser.name},`,
-      ``,
-      `Here is your task summary for ${today}:`,
-      ``,
-      `PENDING TASKS (${pending.length})`,
-      ...pending.map(t => `  • ${t.title} — Due: ${t.deadline} [${t.priority}]`),
-      ``,
-      `IN PROGRESS (${inProgress.length})`,
-      ...inProgress.map(t => `  • ${t.title} — Due: ${t.deadline} [${t.priority}]`),
-      ``,
-      `OVERDUE (${overdue.length})`,
-      ...overdue.map(t => `  • ${t.title} — Was due: ${t.deadline} [${t.priority}]`),
-      ``,
-      `Log in to AgniIT HRMS to update your tasks.`,
-      ``,
-      `— AgniIT HRMS`,
-    ];
+      const myTasks = tasks.filter((t) => t.assignedTo === currentUser.id);
 
-    const body = encodeURIComponent(lines.join("\n"));
-    window.open(`mailto:${currentUser.email}?subject=${subject}&body=${body}`, "_blank");
+      const pending = myTasks.filter((t) => t.status === "Pending");
+      const inProgress = myTasks.filter((t) => t.status === "In Progress");
+      const overdue = myTasks.filter(
+        (t) => t.status !== "Completed" && t.deadline < today
+      );
+
+      const lines = [
+        `Hi ${currentUser.name},`,
+        ``,
+        `Here is your task summary for ${today}:`,
+        ``,
+        `Pending Tasks (${pending.length})`,
+        ...pending.map(
+          (t) => `• ${t.title} | Due: ${t.deadline} | Priority: ${t.priority}`
+        ),
+        ``,
+        `In Progress (${inProgress.length})`,
+        ...inProgress.map(
+          (t) => `• ${t.title} | Due: ${t.deadline} | Priority: ${t.priority}`
+        ),
+        ``,
+        `Overdue (${overdue.length})`,
+        ...overdue.map(
+          (t) => `• ${t.title} | Due: ${t.deadline} | Priority: ${t.priority}`
+        ),
+        ``,
+        `Regards,`,
+        `AgniIT CRM`,
+      ];
+
+      try {
+        const res = await fetch("/api/email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            to: currentUser.email,
+            subject: `AgniIT CRM Daily Task Summary - ${today}`,
+            text: lines.join("\n"),
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert("✅ Email sent successfully!");
+        } else {
+          alert("❌ Failed to send email.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("❌ Something went wrong.");
+      }
+    };
+
+
+
+  const sendTestWhatsApp = async () => {
+    try {
+      const res = await fetch("/api/whatsapp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          // Replace with the WhatsApp number that joined your Twilio Sandbox
+          to: "+919001724978",
+          message:
+            `Hello ${currentUser?.name},
+
+  This is a real WhatsApp message sent from your AgniIT CRM using Twilio 🚀
+
+  Email API ✅
+  WhatsApp API ✅
+
+  Everything is working successfully.`,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("✅ WhatsApp sent successfully!");
+      } else {
+        alert("❌ Failed to send WhatsApp");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("❌ Something went wrong.");
+    }
   };
 
   const toggle = (key: keyof typeof automationSettings) => {
@@ -245,6 +312,23 @@ export default function AutomationPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-card border border-border text-foreground text-sm font-semibold rounded-lg hover:bg-muted transition"
           >
             <Mail size={14} /> Send Test Email
+          </button>
+        </div>
+        <div className="border-t border-border pt-4">
+          <h3 className="text-sm font-semibold text-foreground mb-1">
+            Test WhatsApp
+          </h3>
+
+          <p className="text-xs text-muted-foreground mb-3">
+            Send a real WhatsApp message using Twilio.
+          </p>
+
+          <button
+            onClick={sendTestWhatsApp}
+            className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition"
+          >
+            <MessageCircle size={14} />
+            Send Test WhatsApp
           </button>
         </div>
       </div>
