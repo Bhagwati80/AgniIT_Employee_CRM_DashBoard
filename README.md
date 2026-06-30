@@ -24,12 +24,12 @@ A modern Employee Management and CRM Dashboard built with Next.js and TypeScript
 
 ## Demo Credentials
 
-**Email:** [admin@agniit.com](mailto:admin@agniit.com)
+**Email:** [admin@agniit.com](mailto:su-24032@sitare.org)
 **Password:** Admin@123
 
 ## Live Demo
 
-https://agni-it-employee-crm-dash-board-t6t.vercel.app
+agni-it-employee-crm-dash-board-t6t6-j2k0lq16h-agni-it.vercel.app
 
 
 ## Installation
